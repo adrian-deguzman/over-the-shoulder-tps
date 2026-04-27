@@ -1,6 +1,9 @@
 extends Node3D
 
 var speed: float = 40.0 # Make sure this is slow enough to track!
+var max_distance: float = 100.0 # The set distance before the bullet despawns
+var traveled_distance: float = 0.0 # Counter to track how far it has flown
+
 @onready var raycast: RayCast3D = $RayCast3D
 
 func _physics_process(delta: float) -> void:
@@ -18,3 +21,10 @@ func _physics_process(delta: float) -> void:
 	else:
 		# If no collision, move the bullet forward
 		global_translate(-global_basis.z * move_distance)
+		
+		# Add the distance moved this frame to our total traveled distance
+		traveled_distance += move_distance
+		
+		# Clean up memory if the bullet has flown past the set maximum distance
+		if traveled_distance >= max_distance:
+			queue_free()
