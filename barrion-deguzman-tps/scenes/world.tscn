@@ -45,6 +45,9 @@ material = SubResource("StandardMaterial3D_qfnet")
 radius = 0.1
 height = 0.2
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_rwgxs"]
+size = Vector3(0.15, 0.15, 0.15)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rwgxs"]
 albedo_color = Color(0.50980395, 0.8, 0.8666667, 1)
 
@@ -80,10 +83,10 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="CrossHair" type="ColorRect" parent="HUD/CenterContainer" unique_id=1885328866]
-custom_minimum_size = Vector2(4, 4)
+custom_minimum_size = Vector2(7, 7)
 layout_mode = 2
 mouse_filter = 2
-color = Color(1, 0, 0, 1)
+color = Color(0.42000002, 1, 0.4296667, 1)
 
 [node name="Player" type="CharacterBody3D" parent="." unique_id=1198375977]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.010253906, 0)
@@ -124,6 +127,10 @@ mesh = SubResource("SphereMesh_i7141")
 [node name="Ear2" type="MeshInstance3D" parent="Player" unique_id=391198894]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 1.85, 0)
 mesh = SubResource("SphereMesh_i7141")
+
+[node name="GunCollision" type="CollisionShape3D" parent="Player" unique_id=1313207594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.58, 1.37, -0.3)
+shape = SubResource("BoxShape3D_rwgxs")
 
 [node name="Wall1" type="CSGBox3D" parent="." unique_id=716211523]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5, 0, 0)
