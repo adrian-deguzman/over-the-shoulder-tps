@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dxwu7vxpwm1fa"]
 
 [ext_resource type="Script" uid="uid://der5uwxks4mby" path="res://scripts/Player.gd" id="1_nnsk1"]
+[ext_resource type="PackedScene" uid="uid://b2e31k8ewi7o7" path="res://scenes/enemy.tscn" id="2_rwgxs"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rwgxs"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -159,3 +160,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.9, 0.5, 0)
 material_override = SubResource("StandardMaterial3D_k0juu")
 use_collision = true
 size = Vector3(1, 5, 1)
+
+[node name="Enemy" parent="." unique_id=1518527902 instance=ExtResource("2_rwgxs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1, 16)
+
+[node name="Enemy2" parent="." unique_id=2051064441 instance=ExtResource("2_rwgxs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.496729, 1, -12.971874)
+
+[node name="Enemy3" parent="." unique_id=576282225 instance=ExtResource("2_rwgxs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.166724, 1, -12.971874)
+
+[node name="Enemy4" parent="." unique_id=951847925 instance=ExtResource("2_rwgxs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.221859, 1, 17.366007)

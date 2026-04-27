@@ -34,6 +34,14 @@ func _physics_process(delta: float) -> void:
 	
 	if raycast.is_colliding():
 		# It hit something! 
+		var collider = raycast.get_collider()
+		
+		# NEW: Check if the object we hit is an enemy. 
+		# We do this by checking if the object has the "take_damage" function we just made.
+		if collider and collider.has_method("take_damage"):
+			collider.take_damage()
+		
+		# Spawn the standard small explosion at the impact point
 		spawn_explosion(raycast.get_collision_point())
 		
 		# Destroy the bullet.
