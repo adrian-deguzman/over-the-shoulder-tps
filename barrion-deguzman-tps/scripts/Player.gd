@@ -10,12 +10,17 @@ const SENSITIVITY = 0.003
 # We need the aim ray and the muzzle to calculate shooting
 @onready var aim_ray: RayCast3D = $Head/Camera3D/AimRay
 @onready var muzzle: Marker3D = $Head/Gun/Muzzle
+@onready var gun: Node3D = $Head/Gun # NEW: Reference to the gun
 
 # Preload the bullet scene we just created
 var bullet_scene = preload("res://scenes/Bullet.tscn")
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	# NEW: Ensure the camera's aim ray doesn't accidentally hit the player's own body
+	# (This is a major cause of aiming jitter!)
+	aim_ray.add_exception(self)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
@@ -37,9 +42,23 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
+	# NEW: Smooth Convergent Aiming Logic
+	var target_position: Vector3
+	if aim_ray.is_colliding():
+		target_position = aim_ray.get_collision_point()
+	else:
+		target_position = aim_ray.to_global(aim_ray.target_position)
+		
+	# NEW: Interpolate the gun's rotation to look at the target smoothly. 
+	# This completely fixes the violent vibrating/stuttering!
+	var distance_to_target = gun.global_position.distance_to(target_position)
+	if distance_to_target > 1.0: # Prevent aggressive snapping if target is right in your face
+		var target_transform = gun.global_transform.looking_at(target_position, Vector3.UP)
+		gun.global_transform = gun.global_transform.interpolate_with(target_transform, 15.0 * delta)
+
 	# Handle Shooting
 	if Input.is_action_just_pressed("shoot"):
-		shoot()
+		shoot(target_position)
 
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir = Input.get_vector("left", "right", "up", "down")
@@ -57,7 +76,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 # Function to handle the actual firing logic
-func shoot():
+func shoot(target_pos: Vector3):
 	var bullet = bullet_scene.instantiate()
 	
 	# Add the bullet to the main scene tree, NOT as a child of the player.
@@ -67,15 +86,9 @@ func shoot():
 	# Start the bullet exactly at the tip of the gun
 	bullet.global_position = muzzle.global_position
 	
-	# Figure out exactly where the camera crosshair is pointing
-	var target_position: Vector3
-	
-	if aim_ray.is_colliding():
-		# If looking at a wall or enemy, shoot toward that exact impact spot
-		target_position = aim_ray.get_collision_point()
-	else:
-		# If looking at the sky, shoot straight forward 100 meters
-		target_position = aim_ray.to_global(aim_ray.target_position)
-		
 	# Point the bullet directly at the target
-	bullet.look_at(target_position, Vector3.UP)
+	bullet.look_at(target_pos, Vector3.UP)
+	
+	# NEW: Pass the player as an exception so the bullet's raycast doesn't hit you
+	if bullet.has_method("add_exception"):
+		bullet.add_exception(self)

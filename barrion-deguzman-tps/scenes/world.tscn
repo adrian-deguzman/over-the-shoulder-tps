@@ -51,7 +51,7 @@ albedo_color = Color(0.50980395, 0.8, 0.8666667, 1)
 albedo_color = Color(0.70980394, 0.54509807, 0, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k0juu"]
-albedo_color = Color(0.42745098, 0.12941177, 0.30980393, 1)
+albedo_color = Color(0.7019608, 0.21176471, 0.5058824, 1)
 
 [node name="World" type="Node3D" unique_id=822733020]
 

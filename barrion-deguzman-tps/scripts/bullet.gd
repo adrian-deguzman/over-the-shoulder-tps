@@ -10,6 +10,20 @@ var traveled_distance: float = 0.0 # Counter to track how far it has flown
 # Make sure this path exactly matches where you saved Explosion.tscn!
 var explosion_scene = preload("res://scenes/explosion.tscn")
 
+# NEW: Store exceptions so the bullet doesn't hit the player immediately
+var _exceptions: Array = []
+
+func _ready() -> void:
+	# Apply any exceptions added by the player when the bullet enters the tree
+	for node in _exceptions:
+		raycast.add_exception(node)
+
+# NEW: Method called by the player to pass themselves as an exception
+func add_exception(node: CollisionObject3D) -> void:
+	_exceptions.append(node)
+	if raycast != null:
+		raycast.add_exception(node)
+
 func _physics_process(delta: float) -> void:
 	# Calculate how far the bullet will move this exact frame
 	var move_distance = speed * delta
