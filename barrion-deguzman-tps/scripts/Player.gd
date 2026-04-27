@@ -15,9 +15,11 @@ func _unhandled_input(event):
 		# FIX 1: Rotate the entire actor (CharacterBody3D) left and right
 		rotate_y(-event.relative.x * SENSITIVITY)
 		
-		# The camera handles looking up and down independently
-		camera.rotate_x(-event.relative.y * SENSITIVITY)
-		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
+		# FIX 3: Rotate the Head up and down instead of just the Camera.
+		# Because the Gun is a child of the Head, this makes the gun 
+		# pitch up and down in perfect sync with your crosshair view!
+		head.rotate_x(-event.relative.y * SENSITIVITY)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-40), deg_to_rad(60))
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -29,6 +31,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 
 	# Get the input direction and handle the movement/deceleration.
+	# As good practice, you should replace UI actions with custom gameplay actions.
 	var input_dir = Input.get_vector("left", "right", "up", "down")
 	
 	# FIX 2: Use the actor's main transform basis instead of the head's
