@@ -77,7 +77,7 @@ shape = SubResource("ConvexPolygonShape3D_qfnet")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Player/Head" unique_id=1114059216]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7945342, -0.21380544, 1.9607145)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7945342, -0.21380544, 1.2832111)
 
 [node name="Nose" type="MeshInstance3D" parent="Player" unique_id=1893531708]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.505, -0.5)
