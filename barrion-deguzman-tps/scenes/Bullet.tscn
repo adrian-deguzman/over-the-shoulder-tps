@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://0ofmifaxk2yb"]
+
+[ext_resource type="Script" uid="uid://bfa2nybky7ej2" path="res://scripts/bullet.gd" id="1_hf8mt"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p1sfj"]
+albedo_color = Color(1, 0.91764706, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_4utqk"]
+material = SubResource("StandardMaterial3D_p1sfj")
+radius = 0.3
+height = 0.6
+
+[node name="Bullet" type="Node3D" unique_id=1282823345]
+script = ExtResource("1_hf8mt")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1029286823]
+mesh = SubResource("SphereMesh_4utqk")
+
+[node name="RayCast3D" type="RayCast3D" parent="." unique_id=1972624799]
