@@ -1,68 +1,57 @@
 extends Node3D
 
-var speed: float = 40.0 # Make sure this is slow enough to track!
-var max_distance: float = 100.0 # The set distance before the bullet despawns
-var traveled_distance: float = 0.0 # Counter to track how far it has flown
+# slow enough to be visually trackable
+var speed: float = 40.0 
+var max_distance: float = 100.0 
+var traveled_distance: float = 0.0 
 
 @onready var raycast: RayCast3D = $RayCast3D
 
-# Preload the explosion scene. 
-# Make sure this path exactly matches where you saved Explosion.tscn!
+# load the explosion effect for impacts
 var explosion_scene = preload("res://scenes/explosion.tscn")
 
-# NEW: Store exceptions so the bullet doesn't hit the player immediately
+# prevent hitting the player who shot it
 var _exceptions: Array = []
 
 func _ready() -> void:
-	# Apply any exceptions added by the player when the bullet enters the tree
 	for node in _exceptions:
 		raycast.add_exception(node)
 
-# NEW: Method called by the player to pass themselves as an exception
 func add_exception(node: CollisionObject3D) -> void:
 	_exceptions.append(node)
 	if raycast != null:
 		raycast.add_exception(node)
 
 func _physics_process(delta: float) -> void:
-	# Calculate how far the bullet will move this exact frame
+	# short-distance raycast per frame to check for hits
 	var move_distance = speed * delta
 	
-	# Point the raycast forward exactly that distance
 	raycast.target_position = Vector3(0, 0, -move_distance)
-	raycast.force_raycast_update() # Force it to check immediately
+	raycast.force_raycast_update() 
 	
 	if raycast.is_colliding():
-		# It hit something! 
 		var collider = raycast.get_collider()
 		
-		# NEW: Check if the object we hit is an enemy. 
-		# We do this by checking if the object has the "take_damage" function we just made.
+		# check if we hit an enemy to deal damage
 		if collider and collider.has_method("take_damage"):
 			collider.take_damage()
 		
-		# Spawn the standard small explosion at the impact point
+		# spawn small explosion on impact
 		spawn_explosion(raycast.get_collision_point())
 		
-		# Destroy the bullet.
 		queue_free()
 	else:
-		# If no collision, move the bullet forward
+		# move projectile physically so it is not a hitscan
 		global_translate(-global_basis.z * move_distance)
 		
-		# Add the distance moved this frame to our total traveled distance
 		traveled_distance += move_distance
 		
-		# Clean up memory if the bullet has flown past the set maximum distance
 		if traveled_distance >= max_distance:
 			queue_free()
 
-# Helper function to spawn the explosion
 func spawn_explosion(impact_point: Vector3):
 	var explosion = explosion_scene.instantiate()
 	
-	# Add it to the main world tree, not the bullet (since the bullet is about to be deleted!)
 	get_tree().root.add_child(explosion)
 	
-	# Move the explosion to the exact 3D coordinate where the raycast hit
 	explosion.global_position = impact_point

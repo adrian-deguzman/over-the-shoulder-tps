@@ -7,88 +7,77 @@ const SENSITIVITY = 0.003
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 
-# We need the aim ray and the muzzle to calculate shooting
 @onready var aim_ray: RayCast3D = $Head/Camera3D/AimRay
 @onready var muzzle: Marker3D = $Head/Gun/Muzzle
-@onready var gun: Node3D = $Head/Gun # NEW: Reference to the gun
+@onready var gun: Node3D = $Head/Gun 
 
-# Preload the bullet scene we just created
+# load the bullet scene for shooting
 var bullet_scene = preload("res://scenes/Bullet.tscn")
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	# NEW: Ensure the camera's aim ray doesn't accidentally hit the player's own body
-	# (This is a major cause of aiming jitter!)
+	# stop aim ray from hitting the player
 	aim_ray.add_exception(self)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
-		# FIX 1: Rotate the entire actor (CharacterBody3D) left and right
+		# rotate whole body so actor matches camera direction
 		rotate_y(-event.relative.x * SENSITIVITY)
 		
-		# FIX 3: Rotate the Head up and down instead of just the Camera.
-		# Because the Gun is a child of the Head, this makes the gun 
-		# pitch up and down in perfect sync with your crosshair view!
+		# tilt head and gun up and down for aiming
 		head.rotate_x(-event.relative.y * SENSITIVITY)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-40), deg_to_rad(60))
 
 func _physics_process(delta: float) -> void:
-	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# Handle jump.
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# NEW: Smooth Convergent Aiming Logic
+	# figure out exactly where the crosshair is pointing
 	var target_position: Vector3
 	if aim_ray.is_colliding():
 		target_position = aim_ray.get_collision_point()
 	else:
 		target_position = aim_ray.to_global(aim_ray.target_position)
 		
-	# NEW: Interpolate the gun's rotation to look at the target smoothly. 
-	# This completely fixes the violent vibrating/stuttering!
+	# smoothly point the gun at the crosshair target
 	var distance_to_target = gun.global_position.distance_to(target_position)
-	if distance_to_target > 1.0: # Prevent aggressive snapping if target is right in your face
+	if distance_to_target > 1.0: 
 		var target_transform = gun.global_transform.looking_at(target_position, Vector3.UP)
 		gun.global_transform = gun.global_transform.interpolate_with(target_transform, 15.0 * delta)
 
-	# Handle Shooting
 	if Input.is_action_just_pressed("shoot"):
 		shoot(target_position)
 
-	# Get the input direction and handle the movement/deceleration.
 	var input_dir = Input.get_vector("left", "right", "up", "down")
 	
-	# FIX 2: Use the actor's main transform basis instead of the head's
+	# make movement relative to the camera view
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	if direction:
 		velocity.x = direction.x * SPEED
 		velocity.z = direction.z * SPEED
 	else:
-		velocity.x = 0.0 # move_toward(velocity.x, 0, SPEED)
-		velocity.z = 0.0 # move_toward(velocity.z, 0, SPEED)
+		velocity.x = 0.0 
+		velocity.z = 0.0 
 
 	move_and_slide()
 
-# Function to handle the actual firing logic
 func shoot(target_pos: Vector3):
 	var bullet = bullet_scene.instantiate()
 	
-	# Add the bullet to the main scene tree, NOT as a child of the player.
-	# If it's a child of the player, it will drag with you when you move!
+	# spawn bullet independent of player so it doesn't drag
 	get_tree().root.add_child(bullet)
 	
-	# Start the bullet exactly at the tip of the gun
+	# start bullet at gun tip
 	bullet.global_position = muzzle.global_position
 	
-	# Point the bullet directly at the target
+	# aim bullet straight at target
 	bullet.look_at(target_pos, Vector3.UP)
 	
-	# NEW: Pass the player as an exception so the bullet's raycast doesn't hit you
+	# stop bullet from hitting player when it spawns
 	if bullet.has_method("add_exception"):
 		bullet.add_exception(self)
